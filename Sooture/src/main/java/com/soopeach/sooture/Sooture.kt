@@ -11,6 +11,8 @@ import com.soopeach.sooture.enum.ViewPositions
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  *
@@ -19,23 +21,26 @@ import java.io.IOException
  * @since 1.0.0
  *
  */
-class Sooture(private var fileName: String) {
+class Sooture(private var fileName: String = "Sooture") {
+
     private fun getBitmapFromView(view: View): Bitmap {
 
-        if (view.measuredWidth <= 0 || view.measuredHeight <= 0) {
+        if (isValidView(view)) {
+
+            val bitmap = Bitmap.createBitmap(
+                view.measuredWidth,
+                view.measuredHeight,
+                Bitmap.Config.ARGB_8888
+            )
+
+            val canvas = Canvas(bitmap)
+            view.draw(canvas)
+
+            return bitmap
+
+        } else {
             throw SootureExceptions.INVALID_VIEW.exception
         }
-
-        val bitmap = Bitmap.createBitmap(
-            view.measuredWidth,
-            view.measuredHeight,
-            Bitmap.Config.ARGB_8888
-        )
-
-        val canvas = Canvas(bitmap)
-        view.draw(canvas)
-
-        return bitmap
     }
 
     /**
@@ -92,7 +97,8 @@ class Sooture(private var fileName: String) {
         onSaveFailure: (IOException) -> Unit
     ) {
 
-        val file = File(filePath + Delimiters.SLASH.value + fileName + FileExtensions.PNG.value)
+        val file =
+            File(filePath + Delimiters.SLASH.value + fileName + Delimiters.UNDER_SCORE.value + getCurrentDateTimeInfo() + FileExtensions.PNG.value)
         val out = FileOutputStream(file)
 
         try {
@@ -110,5 +116,13 @@ class Sooture(private var fileName: String) {
     fun changeFileName(newFileName: String) {
         this.fileName = newFileName
     }
+
+    private fun getCurrentDateTimeInfo(): String {
+        return LocalDateTime.now().format(
+            DateTimeFormatter.ISO_DATE_TIME
+        ) ?: throw SootureExceptions.INVALID_DATE.exception
+    }
+
+    private fun isValidView(view: View) = 0 <= view.measuredWidth && 0 <= view.measuredHeight
 
 }
