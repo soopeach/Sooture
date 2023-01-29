@@ -7,5 +7,6 @@ package com.soopeach.sooture.enum
  *
  */
 internal enum class Delimiters(val value: Char) {
-    SLASH('/')
+    SLASH('/'),
+    UNDER_SCORE('_')
 }
